@@ -1,6 +1,9 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import * as deepai from "deepai";
 import './App.css';
+import { Button, Tooltip, Typography } from '@material-ui/core';
 
+deepai.setApiKey(process.env.REACT_APP_DEEPAI_APIKEY);
 const url = process.env.REACT_APP_TONE_ANALYZER_URL;
 const apiKey = process.env.REACT_APP_TONE_ANALYZER_APIKEY;
 
@@ -56,7 +59,7 @@ const colorForTone = (tone: string, score: number) => {
     case "tentative":
       return `rgba(158, 255, 223, ${score})`;
     default:
-      return `rgba(255, 255, 255, ${score})`;
+      return `rgba(255, 255, 255, 0)`;
   }
 
 }
@@ -81,6 +84,26 @@ const analyseText = async (text: string) => {
 }
 
 /**
+ * Summarizes given text
+ * 
+ * @param text text to summarize
+ * @returns summarized text
+ */
+const summarizeText = async (text: string) => {
+  return await deepai.callStandardApi("summarization", { text });
+}
+
+/**
+ * Generates more text from given value
+ * 
+ * @param text text to give as base for generation
+ * @returns generated text
+ */
+const generateText = async (text: string) => {
+  return await deepai.callStandardApi("text-generator", { text });
+}
+
+/**
  * React component for rendering application
  */
 function App() {
@@ -89,24 +112,42 @@ function App() {
   const [res, setRes] = useState<AnalysisResult>();
 
   useEffect(() => {
-    if (text) {
+    if (text && text.length > 10) {
       analyseText(text).then(res => setRes(res));
     }
   }, [text]);
 
   const overallTone = res && res.document_tone && res.document_tone.tones.length ? res.document_tone.tones[0].tone_name : "";
-  const sentenceTones = res && res.sentences_tone.length ? res.sentences_tone : [];
+  const sentenceTones = res && res.sentences_tone && res.sentences_tone.length ? res.sentences_tone : [];
   const sentenceToneItems = sentenceTones.map((item, index) => {
     const tone = item.tones.length ? item.tones[0].tone_id : "unknown";
     const toneName = item.tones.length ? item.tones[0].tone_name: "Unknown";
     const score = item.tones.length ? item.tones[0].score : 1;
-    return <span title={`${toneName} ${score * 100} %`} key={index} style={{background: colorForTone(tone, score)}}>{item.text}</span>
+    return (
+      <Tooltip key={index} title={`${toneName} ${score * 100} %`}>
+        <span style={{background: colorForTone(tone, score)}}>{item.text}</span>
+      </Tooltip>
+    );
+    
+
   })
   return (
     <div className="App">
-      <header className="App-header">
-        <h1>{`Overall tone: ${overallTone}`}</h1>
-        <textarea className="textInput" rows={16} value={text} onChange={(e) => setText(e.currentTarget.value)} />
+      <div className="half">
+        <div className="toolContainer">
+          <Button color="primary" onClick={() => { 
+            summarizeText(text)
+              .then(res => res.output && setText(res.output));
+          }}>Summarize</Button>
+          <Button color="primary" onClick={() => { 
+            generateText(text)
+              .then(res => res.output && setText(res.output));
+          }}>Generate</Button>
+        </div>
+        <textarea value={text} className="textInput" onChange={(e) => setText(e.currentTarget.value)} />
+      </div>
+      <div className="half">
+        <Typography color="primary" variant="h6">{`Overall tone: ${overallTone}`}</Typography>
         <div className="legend">
           {["anger", "fear", "joy", "sadness", "analytical", "confident", "tentative"].map((toneId) => {
             return <div className="legendItem" key={toneId}>
@@ -118,7 +159,7 @@ function App() {
         <div className="sentenceResultContainer">
           {sentenceToneItems}
         </div>
-      </header>
+      </div>
     </div>
   );
 }

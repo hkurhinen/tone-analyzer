@@ -1,6 +1,6 @@
 # Tone analyzer demo
 
-Project for analysing tone of different texts, uses IBM tone analyzer API.
+Project for analysing tone of different texts, uses IBM tone analyzer API and couple https://deepai.org models.
 
 ## Usage
 
@@ -9,6 +9,7 @@ create file called .env to the root of the project with following contents:
 ```
 REACT_APP_TONE_ANALYZER_URL=your tone analyzer api url
 REACT_APP_TONE_ANALYZER_APIKEY=your api key
+REACT_APP_DEEPAI_APIKEY=your deepai api key
 ```
 
 ### Install dependencies

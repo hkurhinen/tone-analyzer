@@ -1,7 +1,3 @@
-.App {
-  text-align: center;
-}
-
 .App-header {
   background-color: #282c34;
   min-height: 100vh;
@@ -10,6 +6,21 @@
   align-items: center;
   color: white;
 }
+.App {
+  display: flex;
+  background-color: #282c34;
+  min-height: 100vh;
+  color: white;
+}
+.half {
+  width: 50vw;
+  height: 100vh;
+  overflow-y: scroll;
+}
+
+.toolContainer {
+  margin-left: 15px;
+}
 
 .sentenceResultContainer {
   max-width: 700px;
@@ -17,8 +28,18 @@
 }
 
 .textInput {
-  min-width: 700px;
-  margin-bottom: 20px;
+  width: calc(100% - 32px);
+  height: 100%;
+  background: #282c34;
+  color: #fff;
+  font-size: 18px;
+  border: none;
+  margin-left: 15px;
+  margin-right: 15px;
+}
+
+.textInput:focus {
+    outline: none;
 }
 
 .legend {
